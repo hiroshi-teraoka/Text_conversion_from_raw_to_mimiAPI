@@ -1,6 +1,4 @@
-# microphone_converte
-
-# mimiAPIへ音声ー＞テキスト変換
+# 音声(raw)ファイルー＞テキスト変換　mimiAPI
 ```
 $ virtualenv venv
 $ source venv/bin/activate
