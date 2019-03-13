@@ -2,3 +2,5 @@ venv/
 *.raw
 *.wav
 *.zip
+
+.idea

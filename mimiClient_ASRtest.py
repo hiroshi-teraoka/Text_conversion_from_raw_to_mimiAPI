@@ -2,6 +2,7 @@ import requests
 import sys
 import json
 
+
 class mimiClientAPI:
     """mimiAPI"""
 
@@ -10,6 +11,9 @@ class mimiClientAPI:
         self._client_secret = client_secret
 
     def get_accesstoken(self):
+        """
+        mimiアクセストークン取得
+        """
         files = {
             'grant_type': (None, 'https://auth.mimi.fd.ai/grant_type/client_credentials'),
             'client_id': (None, self._client_id),
@@ -22,7 +26,9 @@ class mimiClientAPI:
         return accessToken
 
     def voice_to_text(self, accessToken, input_file_path):
-
+       """
+       音声ー＞テキスト変換
+       """
        #engine = "nict-asr"
        engine = "google-asr"
        #engine = "asr"
@@ -43,6 +49,10 @@ class mimiClientAPI:
 
 
 if __name__=='__main__':
+    """
+    実行方法  (入力と出力のファイルは置いてあるパスまで指定）
+    python text_evaluation.py input_excel/input_指向性_3_8.xlsx output_excel/output_指向性_3_8.xlsx
+    """
     args = sys.argv
     # print(args[1], args[2], args[3], args[4], args[5])
     mimi_client_api = mimiClientAPI(args[1], args[2], args[3])
@@ -50,10 +60,5 @@ if __name__=='__main__':
     print("accesstoken : ", accesstoken)
     response = mimi_client_api.voice_to_text(accesstoken, args[4])
     print("response : ", response)
-    #for i in response.json()['response']:
-    #    print("i : ", i['result'])
     text_list = [i['result'] for i in response.json()['response']]
     mimi_client_api.output_file(text_list, args[5])
-    #print('\n'.join(text_list))
-    #text_list = [i['result'] for i in response['response']]
-    #print('\n'.join(text_list))
