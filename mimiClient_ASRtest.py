@@ -1,7 +1,7 @@
 import requests
 import sys
 import json
-
+import re
 
 class mimiClientAPI:
     """mimiAPI"""
@@ -29,23 +29,40 @@ class mimiClientAPI:
        """
        音声ー＞テキスト変換
        """
-       #engine = "nict-asr"
-       engine = "google-asr"
-       #engine = "asr"
+       # engine = "nict-asr"
+       # engine = "google-asr"
+       engine = "asr"  # フェアリーデバイスのエンジン
        headers = {
-            'Content-Type': 'audio/x-pcm;bit=16;rate=48000;channels=1',
+            'Content-Type': 'audio/x-pcm;bit=16;rate=16000;channels=1',
             'x-mimi-process': engine,
             'Authorization': 'Bearer '+accessToken,
        }
        data = open(input_file_path, 'rb').read()
        response = requests.post('https://service.mimi.fd.ai/', headers=headers, data=data)
        print(response)
-       return response
+       return response, engine
        # return response.json()
 
     def output_file(self, text_list, file_path):
         with open(file_path, mode='w') as f:
             f.write('\n'.join(text_list))
+
+    def get_asr_text(self, engine, response):
+        if engine=="asr":
+            res = response.json()
+            result = ""
+            for i in range(len(res["response"])):
+                result+=res["response"][i]["result"]
+        elif engine=="nict-asr":
+            res = response.json()
+            result = ""
+            for i in range(len(res["response"])):
+                result+=re.search(".*?\|",res["response"][i]["result"]).group().replace("|","")
+        elif engine=="google-asr":
+            res = response.json()
+            result = ""
+            result = res["response"][0]["result"]
+        return result
 
 
 if __name__=='__main__':
@@ -58,7 +75,10 @@ if __name__=='__main__':
     mimi_client_api = mimiClientAPI(args[1], args[2], args[3])
     accesstoken = mimi_client_api.get_accesstoken()
     print("accesstoken : ", accesstoken)
-    response = mimi_client_api.voice_to_text(accesstoken, args[4])
+    response, engine = mimi_client_api.voice_to_text(accesstoken, args[4])
     print("response : ", response)
-    text_list = [i['result'] for i in response.json()['response']]
-    mimi_client_api.output_file(text_list, args[5])
+    # text_list = [i['result'] for i in response.json()['response']]
+    output_text = mimi_client_api.get_asr_text(engine, response)
+    mimi_client_api.output_file(output_text, args[5])
+
+
